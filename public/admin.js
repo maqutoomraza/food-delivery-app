@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const userRole = localStorage.getItem('userRole');
 
     if (!token) {
-        // If no token, redirect to login page
         window.location.href = '/login.html';
         return;
     }
@@ -19,14 +18,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModalBtn = document.querySelector('.close-btn');
     let productList = [];
 
+    // --- Analytics Selectors ---
+    const ordersTableBody = document.querySelector('#orders-table tbody');
+    const salesChartCanvas = document.getElementById('salesChart');
+    let salesChart = null;
+
     // --- UI Setup based on Role ---
     if (userRole === 'manager') {
-        // Hide all elements that modify data
         form.style.display = 'none';
         document.querySelector('h2').textContent = 'Product View (Manager)';
-        exportBtn.style.display = 'none'; // Optional: hide export for manager
+        exportBtn.style.display = 'none';
     }
 
+    // --- Fetch Products ---
     async function fetchProducts() {
         try {
             const headers = { 'Authorization': `Bearer ${token}` };
@@ -56,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- Open/Close Edit Modal ---
     function openEditModal(product) {
         editForm.querySelector('#edit-id').value = product.id;
         editForm.querySelector('#edit-name').value = product.name;
@@ -64,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
         editForm.querySelector('#edit-stock').value = product.stock;
         editModal.style.display = 'flex';
     }
-
     function closeEditModal() {
         editModal.style.display = 'none';
         editForm.reset();
@@ -79,12 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Authorization': `Bearer ${token}` }, 
             body: formData 
         });
-        if (response.ok) {
-            form.reset();
-            fetchProducts();
-        } else {
-            alert('Failed to add product.');
-        }
+        if (response.ok) { form.reset(); fetchProducts(); } 
+        else alert('Failed to add product.');
     });
 
     // --- Edit & Delete Products ---
@@ -117,26 +117,22 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Authorization': `Bearer ${token}` }, 
             body: formData 
         });
-        if (response.ok) {
-            closeEditModal();
-            fetchProducts();
-        } else {
-            alert('Failed to update product.');
-        }
+        if (response.ok) { closeEditModal(); fetchProducts(); } 
+        else alert('Failed to update product.');
     });
 
     closeModalBtn.addEventListener('click', closeEditModal);
 
     // --- Select All Checkbox ---
     selectAllCheckbox.addEventListener('change', (event) => {
-        document.querySelectorAll('.product-checkbox').forEach(checkbox => checkbox.checked = event.target.checked);
+        document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = event.target.checked);
     });
 
     // --- Export Excel ---
     exportBtn.addEventListener('click', async () => {
         const selectedCheckboxes = document.querySelectorAll('.product-checkbox:checked');
         const productIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.id);
-        if (productIds.length === 0) return alert('Please select at least one product to export.');
+        if (!productIds.length) return alert('Please select at least one product to export.');
         const response = await fetch('/api/export-excel', {
             method: 'POST',
             headers: { 
@@ -155,10 +151,59 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
-        } else {
-            alert('Failed to export data.');
-        }
+        } else alert('Failed to export data.');
     });
 
+    // --- Fetch and Display Analytics ---
+    async function fetchAnalyticsData() {
+        try {
+            const headers = { 'Authorization': `Bearer ${token}` };
+            const response = await fetch('/api/analytics', { headers });
+            const orders = await response.json();
+
+            // Order Table
+            ordersTableBody.innerHTML = '';
+            orders.forEach(order => {
+                ordersTableBody.innerHTML += `<tr>
+                    <td>${order.orderId}</td>
+                    <td>${new Date(order.date).toLocaleString()}</td>
+                    <td>${order.customerName}</td>
+                    <td>RS ${order.totalAmount.toFixed(2)}</td>
+                </tr>`;
+            });
+
+            // Sales Chart
+            const salesByDate = orders.reduce((acc, order) => {
+                const date = new Date(order.date).toLocaleDateString('en-IN');
+                acc[date] = (acc[date] || 0) + order.totalAmount;
+                return acc;
+            }, {});
+            const chartLabels = Object.keys(salesByDate);
+            const chartData = Object.values(salesByDate);
+
+            if (salesChart) salesChart.destroy();
+            salesChart = new Chart(salesChartCanvas, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Total Sales (RS)',
+                        data: chartData,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: { scales: { y: { beginAtZero: true } } }
+            });
+
+        } catch (error) {
+            console.error("Failed to fetch analytics:", error);
+            ordersTableBody.innerHTML = `<tr><td colspan="4">Error loading orders.</td></tr>`;
+        }
+    }
+
+    // --- Initialize ---
     fetchProducts();
+    fetchAnalyticsData();
 });

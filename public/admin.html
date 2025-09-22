@@ -3,28 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <title>Admin Panel</title>
+    
+    <!-- Chart.js Library for rendering charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Styles for layout, tables, buttons, forms, and modals -->
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 20px 40px; background-color: #f9f9f9; }
+        /* Body and general text */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            margin: 20px 40px; 
+            background-color: #f9f9f9; 
+        }
         h1, h2 { color: #333; }
-        form { margin-bottom: 30px; border: 1px solid #ddd; padding: 20px; border-radius: 8px; max-width: 500px; background-color: white; }
+
+        /* Buttons */
+        button { 
+            background-color: #007bff; 
+            color: white; 
+            padding: 10px 15px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 1rem; 
+            margin-right: 10px; 
+        }
+        button:hover { opacity: 0.9; }
+        #export-btn { background-color: #28a745; margin-top: 20px; }
+
+        /* Layout: container with two columns */
+        .container { display: flex; gap: 30px; }
+        .left, .right { flex: 1; }
+
+        /* Product Form Styles */
+        form { 
+            margin-bottom: 30px; 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            border-radius: 8px; 
+            background-color: white; 
+        }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: 600; }
         input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; margin-right: 10px; }
-        button:hover { opacity: 0.9; }
-        #export-btn { background-color: #28a745; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        /* Tables */
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background-color: white; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            margin-bottom: 20px; 
+        }
         th, td { border: 1px solid #ddd; padding: 12px; text-align: left; vertical-align: middle; }
         th { background-color: #f2f2f2; }
         td img { max-width: 80px; max-height: 50px; border-radius: 4px; object-fit: cover; }
         th:first-child, td:first-child { text-align: center; }
         input[type="checkbox"] { width: 18px; height: 18px; }
+
+        /* Action buttons inside tables */
         .actions-cell button { font-size: 0.8rem; padding: 5px 10px; }
         .edit-btn { background-color: #ffc107; color: black; }
         .delete-btn { background-color: #dc3545; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-        .modal-content { background-color: #fefefe; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; border-radius: 8px; }
+
+        /* Modals */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; top: 0; 
+            width: 100%; height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.5); 
+            justify-content: center; 
+            align-items: center; 
+        }
+        .modal-content { 
+            background-color: #fefefe; 
+            padding: 20px; 
+            border: 1px solid #888; 
+            width: 80%; 
+            max-width: 500px; 
+            border-radius: 8px; 
+        }
         .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+
+        /* Analytics Section */
+        .analytics-section { background-color: white; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
     </style>
 </head>
 <body>
@@ -34,59 +99,126 @@
         <button id="logout-btn" style="background-color: #6c757d;">Logout</button>
     </div>
 
-    <h1>Product Management</h1>
+    <!-- Main Container with two columns -->
+    <div class="container">
+        <!-- Left Column: Product Management -->
+        <div class="left">
+            <h1>Product Management</h1>
 
-    <form id="add-product-form" enctype="multipart/form-data">
-        <h2>Add New Product</h2>
-        <div class="form-group"><label for="name">Product Name</label><input type="text" id="name" name="name" required></div>
-        <div class="form-group"><label for="category">Category</label><input type="text" id="category" name="category" placeholder="e.g., Pizza, Burger, Drinks" required></div>
-        <div class="form-group"><label for="price">Price (RS)</label><input type="number" id="price" name="price" step="0.01" required></div>
-        <div class="form-group"><label for="stock">Stock</label><input type="number" id="stock" name="stock" required></div>
-        <div class="form-group"><label for="image">Product Image</label><input type="file" id="image" name="image" accept="image/*" required></div>
-        <button type="submit">Add Product</button>
-    </form>
-    
-    <h2>Current Products</h2>
-    <table id="inventory-table">
-        <thead>
-            <tr>
-                <th><input type="checkbox" id="select-all"></th>
-                <th>Image</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Available Stock</th> 
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-    <button id="export-btn">Export Selected to Excel</button>
+            <!-- Add Product Form -->
+            <form id="add-product-form" enctype="multipart/form-data">
+                <h2>Add New Product</h2>
+                <div class="form-group">
+                    <label for="name">Product Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <input type="text" id="category" name="category" placeholder="e.g., Pizza, Burger, Drinks" required>
+                </div>
+                <div class="form-group">
+                    <label for="price">Price (RS)</label>
+                    <input type="number" id="price" name="price" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="stock">Stock</label>
+                    <input type="number" id="stock" name="stock" required>
+                </div>
+                <div class="form-group">
+                    <label for="image">Product Image</label>
+                    <input type="file" id="image" name="image" accept="image/*" required>
+                </div>
+                <button type="submit">Add Product</button>
+            </form>
 
+            <!-- Product Table -->
+            <h2>Current Products</h2>
+            <table id="inventory-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select-all"></th>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Available Stock</th> 
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <!-- Export Button for selected products -->
+            <button id="export-btn">Export Selected to Excel</button>
+        </div>
+
+        <!-- Right Column: Analytics -->
+        <div class="right">
+            <!-- Sales Chart -->
+            <div class="analytics-section">
+                <h2>Sales Analytics</h2>
+                <canvas id="salesChart"></canvas>
+            </div>
+
+            <!-- Order History Table -->
+            <div class="analytics-section">
+                <h2>Order History</h2>
+                <table id="orders-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Customer Name</th>
+                            <th>Total Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
     <div id="edit-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn">&times;</span>
             <h2>Edit Product</h2>
             <form id="edit-product-form" enctype="multipart/form-data">
+                <!-- Hidden input to store product ID -->
                 <input type="hidden" id="edit-id" name="id">
-                <div class="form-group"><label for="edit-name">Product Name</label><input type="text" id="edit-name" name="name" required></div>
-                <div class="form-group"><label for="edit-category">Category</label><input type="text" id="edit-category" name="category" required></div>
-                <div class="form-group"><label for="edit-price">Price (RS)</label><input type="number" id="edit-price" name="price" step="0.01" required></div>
-                <div class="form-group"><label for="edit-stock">Stock</label><input type="number" id="edit-stock" name="stock" required></div>
-                <div class="form-group"><label for="edit-image">New Product Image (Optional)</label><input type="file" id="edit-image" name="image" accept="image/*"></div>
+                
+                <div class="form-group">
+                    <label for="edit-name">Product Name</label>
+                    <input type="text" id="edit-name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-category">Category</label>
+                    <input type="text" id="edit-category" name="category" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-price">Price (RS)</label>
+                    <input type="number" id="edit-price" name="price" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-stock">Stock</label>
+                    <input type="number" id="edit-stock" name="stock" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-image">New Product Image (Optional)</label>
+                    <input type="file" id="edit-image" name="image" accept="image/*">
+                </div>
                 <button type="submit">Save Changes</button>
             </form>
         </div>
     </div>
 
-    <!-- JS Section -->
+    <!-- JavaScript -->
     <script src="admin.js"></script>
     <script>
-        // Logout script
+        // Logout functionality
         document.getElementById('logout-btn').addEventListener('click', () => {
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('userRole');
-            window.location.href = '/login.html';
+            localStorage.removeItem('accessToken'); // Remove token
+            localStorage.removeItem('userRole'); // Remove role
+            window.location.href = '/login.html'; // Redirect to login page
         });
     </script>
 </body>

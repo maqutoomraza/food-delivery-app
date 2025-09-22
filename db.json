@@ -3,7 +3,7 @@
     {
       "name": "Turkey Pepperoni Pizza",
       "price": 199,
-      "stock": 3,
+      "stock": 0,
       "category": "Pizza",
       "id": "turkey-pepperoni-pizza-1758316148802",
       "image": "/uploads/image-1758316148799-421743020.jpg"
@@ -11,15 +11,15 @@
     {
       "name": "Plane Veg Burger",
       "price": 149,
-      "stock": 6,
+      "stock": 1998,
       "category": "Burger",
       "id": "plane-veg-burger-1758316194130",
       "image": "/uploads/image-1758316194128-807162950.jpg"
     },
     {
       "name": "Margherita Pizza",
-      "price": 149,
-      "stock": 46,
+      "price": 14548,
+      "stock": 780,
       "category": "Pizza",
       "id": "margherita-pizza-1758316244091",
       "image": "/uploads/image-1758316244088-950160663.jpg"
@@ -27,10 +27,18 @@
     {
       "name": "Burger basic",
       "price": 50,
-      "stock": 5,
+      "stock": 3,
       "category": "Burger",
       "id": "burger-basic-1758556823089",
       "image": "/uploads/image-1758556823087-497809329.jpeg"
+    },
+    {
+      "name": "Veg Noodles",
+      "price": 199,
+      "stock": 8,
+      "category": "Noodles",
+      "id": "veg-noodles-1758567234919",
+      "image": "/uploads/image-1758567234915-458516235.jpg"
     }
   ],
   "users": [
@@ -45,6 +53,146 @@
       "username": "manager",
       "password": "$2a$10$B5k0h.m5hX.8Ua4t1fN4H.2N2aC2d7l3fX.6i9n2l8fX.5c8hM6q",
       "role": "manager"
+    }
+  ],
+  "orders": [
+    {
+      "orderId": "order-1758565489836",
+      "date": "2025-09-22T18:24:49.836Z",
+      "customerName": "Raza",
+      "paymentMethod": "Paid",
+      "totalAmount": 298,
+      "items": [
+        {
+          "id": "plane-veg-burger-1758316194130",
+          "name": "Plane Veg Burger",
+          "price": 149,
+          "quantity": 1
+        },
+        {
+          "id": "margherita-pizza-1758316244091",
+          "name": "Margherita Pizza",
+          "price": 149,
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "orderId": "order-1758565544309",
+      "date": "2025-09-22T18:25:44.309Z",
+      "customerName": "Raza",
+      "paymentMethod": "Paid",
+      "totalAmount": 2335,
+      "items": [
+        {
+          "id": "turkey-pepperoni-pizza-1758316148802",
+          "name": "Turkey Pepperoni Pizza",
+          "price": 199,
+          "quantity": 1
+        },
+        {
+          "id": "plane-veg-burger-1758316194130",
+          "name": "Plane Veg Burger",
+          "price": 149,
+          "quantity": 5
+        },
+        {
+          "id": "margherita-pizza-1758316244091",
+          "name": "Margherita Pizza",
+          "price": 149,
+          "quantity": 9
+        },
+        {
+          "id": "burger-basic-1758556823089",
+          "name": "Burger basic",
+          "price": 50,
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "orderId": "order-1758565633436",
+      "date": "2025-09-22T18:27:13.436Z",
+      "customerName": "Raza",
+      "paymentMethod": "Paid",
+      "totalAmount": 497,
+      "items": [
+        {
+          "id": "plane-veg-burger-1758316194130",
+          "name": "Plane Veg Burger",
+          "price": 149,
+          "quantity": 1
+        },
+        {
+          "id": "margherita-pizza-1758316244091",
+          "name": "Margherita Pizza",
+          "price": 149,
+          "quantity": 1
+        },
+        {
+          "id": "turkey-pepperoni-pizza-1758316148802",
+          "name": "Turkey Pepperoni Pizza",
+          "price": 199,
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "orderId": "order-1758565686389",
+      "date": "2025-09-22T18:28:06.389Z",
+      "customerName": "Raza",
+      "paymentMethod": "Paid",
+      "totalAmount": 3129,
+      "items": [
+        {
+          "id": "margherita-pizza-1758316244091",
+          "name": "Margherita Pizza",
+          "price": 149,
+          "quantity": 21
+        }
+      ]
+    },
+    {
+      "orderId": "order-1758566087845",
+      "date": "2025-09-22T18:34:47.845Z",
+      "customerName": "Maqutoom",
+      "paymentMethod": "Paid",
+      "totalAmount": 894,
+      "items": [
+        {
+          "id": "margherita-pizza-1758316244091",
+          "name": "Margherita Pizza",
+          "price": 149,
+          "quantity": 6
+        }
+      ]
+    },
+    {
+      "orderId": "order-1758567055071",
+      "date": "2025-09-22T18:50:55.071Z",
+      "customerName": "Raza",
+      "paymentMethod": "Paid",
+      "totalAmount": 291159,
+      "items": [
+        {
+          "id": "margherita-pizza-1758316244091",
+          "name": "Margherita Pizza",
+          "price": 14548,
+          "quantity": 20
+        },
+        {
+          "id": "plane-veg-burger-1758316194130",
+          "name": "Plane Veg Burger",
+          "price": 149,
+          "quantity": 1
+        },
+        {
+          "id": "burger-basic-1758556823089",
+          "name": "Burger basic",
+          "price": 50,
+          "quantity": 1
+        }
+      ]
     }
   ]
 }
