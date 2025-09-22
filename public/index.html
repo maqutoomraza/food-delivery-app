@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Eats - Food Delivery</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; color: #333; }
+        .container { width: 90%; max-width: 1200px; margin: 0 auto; }
+        header { background-color: #ff6347; color: white; padding: 1rem 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        header h1 { margin: 0; text-align: center; }
+        .page-content { display: flex; flex-wrap: wrap; gap: 2rem; padding: 2rem 0; }
+        #menu { flex: 3; }
+        .sidebar { flex: 1; display: flex; flex-direction: column; gap: 2rem; }
+        #cart, #customer-details { background-color: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); align-self: flex-start; }
+        #menu h2, #cart h2, #customer-details h2 { text-align: center; margin-top: 0; margin-bottom: 2rem; font-size: 2.5rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .filter-container { margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; }
+        .filter-container label { font-weight: bold; }
+        #category-filter { padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 1rem; }
+        .menu-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .menu-item { display: flex; flex-direction: column; position: relative; background-color: white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden; text-align: center; transition: transform 0.2s; }
+        .menu-item-content { flex-grow: 1; padding-bottom: 1rem; }
+        .menu-item:hover { transform: translateY(-5px); }
+        .menu-item img { width: 100%; height: 200px; object-fit: cover; }
+        .menu-item h3 { margin: 1rem 0 0.5rem 0; font-size: 1.5rem; }
+        .menu-item p { font-size: 0.9rem; padding: 0 1rem; color: #666; }
+        .menu-item .price { display: block; font-size: 1.25rem; font-weight: bold; color: #333; margin: 1rem 0; }
+        .out-of-stock-label { position: absolute; top: 10px; right: 10px; background-color: #dc3545; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.9rem; font-weight: bold; }
+        .cart-action-container { padding: 0 1rem 1rem 1rem; }
+        .add-to-cart-btn { background-color: #28a745; color: white; border: none; padding: 12px 20px; font-size: 1rem; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; width: 100%; box-sizing: border-box;}
+        .add-to-cart-btn:disabled { background-color: #6c757d; cursor: not-allowed; }
+        .quantity-selector-card { display: flex; justify-content: space-around; align-items: center; width: 100%; }
+        .quantity-btn-card { background-color: #ff6347; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-weight: bold; font-size: 1.5rem; cursor: pointer; }
+        .item-quantity-card { font-weight: bold; font-size: 1.2rem; }
+        #cart-items { margin-bottom: 1.5rem; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #eee; }
+        .cart-item-info { flex-grow: 1; }
+        .cart-item-controls { display: flex; align-items: center; gap: 0.5rem; }
+        .quantity-btn { background-color: #ddd; border: none; width: 25px; height: 25px; border-radius: 50%; font-weight: bold; cursor: pointer; }
+        .item-quantity { font-weight: bold; min-width: 20px; text-align: center; }
+        #cart-total { text-align: right; font-size: 1.5rem; color: #333; margin-bottom: 1.5rem; }
+        #order-btn { background-color: #007bff; color: white; border: none; padding: 12px 20px; font-size: 1rem; border-radius: 5px; cursor: pointer; width: 100%; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+    <header><nav><div class="container"><h1>Quick Eats</h1></div></nav></header>
+    <main class="container page-content">
+        <section id="menu">
+            <h2>Our Menu</h2>
+            <div class="filter-container">
+                <label for="category-filter">Filter by Category:</label>
+                <select id="category-filter"></select>
+            </div>
+            <div class="menu-container"></div>
+        </section>
+        <div class="sidebar">
+            <section id="customer-details">
+                <h2>Customer Details</h2>
+                <div class="form-group"><label for="customer-name">Name</label><input type="text" id="customer-name" placeholder="Enter customer name"></div>
+                <div class="form-group"><label for="customer-phone">Phone Number</label><input type="tel" id="customer-phone" placeholder="Enter phone number"></div>
+                <div class="form-group"><label for="billed-by">Billed By</label><select id="billed-by"><option value="Counter 1">Counter 1</option><option value="Counter 2">Counter 2</option></select></div>
+                <div class="form-group"><label for="payment-method">Payment Method</label><select id="payment-method"><option value="Paid">Paid</option><option value="COD">COD</option><option value="Other">Other</option></select></div>
+            </section>
+            <aside id="cart">
+                <h2>Shopping Cart</h2>
+                <div id="cart-items"><p>Your cart is empty.</p></div>
+                <div id="cart-total"><strong>Total: RS <span id="total-price">0.00</span></strong></div>
+                <button id="order-btn">Place Order & Print</button>
+            </aside>
+        </div>
+    </main>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const menuContainer = document.querySelector('.menu-container');
+        const cartItemsContainer = document.getElementById('cart-items');
+        const totalPriceElement = document.getElementById('total-price');
+        const orderButton = document.getElementById('order-btn');
+        const customerNameInput = document.getElementById('customer-name');
+        const customerPhoneInput = document.getElementById('customer-phone');
+        const billedBySelect = document.getElementById('billed-by');
+        const paymentMethodSelect = document.getElementById('payment-method');
+        const categoryFilter = document.getElementById('category-filter');
+        let shoppingCart = [];
+        let productList = [];
+
+        async function initializeApp() {
+            await fetchProducts();
+            populateCategoryFilter();
+            renderFilteredMenu();
+        }
+        
+        async function fetchProducts() {
+            try {
+                const response = await fetch('/api/products');
+                if (!response.ok) throw new Error('Network error');
+                productList = await response.json();
+            } catch (error) {
+                menuContainer.innerHTML = '<p>Could not load menu.</p>';
+            }
+        }
+
+        function populateCategoryFilter() {
+            const categories = ['All', ...new Set(productList.map(p => p.category))];
+            categoryFilter.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        }
+
+        function renderMenu(productsToRender) {
+            menuContainer.innerHTML = '';
+            if (productsToRender.length === 0) {
+                menuContainer.innerHTML = '<p>No products in this category.</p>';
+                return;
+            }
+            productsToRender.forEach(product => {
+                const isOutOfStock = product.stock <= 0;
+                const itemInCart = shoppingCart.find(item => item.id === product.id);
+                let actionButtonHTML = '';
+                if (isOutOfStock) {
+                    actionButtonHTML = `<button class="add-to-cart-btn" disabled>Out of Stock</button>`;
+                } else if (itemInCart) {
+                    actionButtonHTML = `<div class="quantity-selector-card"><button class="quantity-btn-card minus" data-id="${product.id}">-</button><span class="item-quantity-card">${itemInCart.quantity}</span><button class="quantity-btn-card plus" data-id="${product.id}">+</button></div>`;
+                } else {
+                    actionButtonHTML = `<button class="add-to-cart-btn" data-id="${product.id}">Add to Cart</button>`;
+                }
+                menuContainer.innerHTML += `<div class="menu-item" data-id="${product.id}"><div class="menu-item-content">${isOutOfStock ? '<div class="out-of-stock-label">Out of Stock</div>' : ''}<img src="${product.image}" alt="${product.name}" style="opacity: ${isOutOfStock ? 0.5 : 1};"><h3>${product.name}</h3><p>Available: ${product.stock}</p><span class="price">RS ${product.price.toFixed(2)}</span></div><div class="cart-action-container">${actionButtonHTML}</div></div>`;
+            });
+        }
+        
+        function renderFilteredMenu() {
+            const selectedCategory = categoryFilter.value;
+            const filteredProducts = selectedCategory === 'All' ? productList : productList.filter(p => p.category === selectedCategory);
+            renderMenu(filteredProducts);
+        }
+        
+        categoryFilter.addEventListener('change', renderFilteredMenu);
+        
+        menuContainer.addEventListener('click', (event) => {
+            const target = event.target;
+            const id = target.closest('.menu-item')?.dataset.id;
+            if (!id) return;
+            const product = productList.find(p => p.id === id);
+            if (!product) return;
+            if (target.classList.contains('add-to-cart-btn') || target.classList.contains('plus')) {
+                addItemToCart(product.id, product.name, product.price);
+            } else if (target.classList.contains('minus')) {
+                updateItemQuantity(product.id, 'decrease');
+            }
+        });
+
+        cartItemsContainer.addEventListener('click', (event) => {
+            if (event.target.classList.contains('quantity-btn')) {
+                updateItemQuantity(event.target.dataset.id, event.target.dataset.action);
+            }
+        });
+
+        orderButton.addEventListener('click', placeOrderAndPrintInvoice);
+        
+        function addItemToCart(id, name, price) {
+            const productInStock = productList.find(p => p.id === id);
+            const existingItem = shoppingCart.find(item => item.id === id);
+            const currentQuantityInCart = existingItem ? existingItem.quantity : 0;
+            if (currentQuantityInCart >= productInStock.stock) return alert(`Sorry, only ${productInStock.stock} ${name} available.`);
+            if (existingItem) existingItem.quantity++;
+            else shoppingCart.push({ id, name, price, quantity: 1 });
+            updateCartDisplay();
+            renderFilteredMenu();
+        }
+
+        function updateItemQuantity(id, action) {
+            const itemIndex = shoppingCart.findIndex(item => item.id === id);
+            if (itemIndex === -1) return;
+            const item = shoppingCart[itemIndex];
+            const productInStock = productList.find(p => p.id === id);
+            if (action === 'increase') {
+                if (item.quantity >= productInStock.stock) return alert(`Sorry, only ${productInStock.stock} ${item.name} available.`);
+                item.quantity++;
+            } else if (action === 'decrease') {
+                item.quantity--;
+                if (item.quantity <= 0) shoppingCart.splice(itemIndex, 1);
+            }
+            updateCartDisplay();
+            renderFilteredMenu();
+        }
+        
+        function updateCartDisplay() {
+            cartItemsContainer.innerHTML = '';
+            if (shoppingCart.length === 0) {
+                cartItemsContainer.innerHTML = '<p>Your cart is empty.</p>';
+                totalPriceElement.textContent = '0.00';
+                return;
+            }
+            let totalPrice = 0;
+            shoppingCart.forEach(item => {
+                totalPrice += item.price * item.quantity;
+                const cartItemElement = document.createElement('div');
+                cartItemElement.classList.add('cart-item');
+                cartItemElement.innerHTML = `<div class="cart-item-info"><span>${item.name}</span></div><div class="cart-item-controls"><button class="quantity-btn" data-id="${item.id}" data-action="decrease">-</button><span class="item-quantity">${item.quantity}</span><button class="quantity-btn" data-id="${item.id}" data-action="increase">+</button></div>`;
+                cartItemsContainer.appendChild(cartItemElement);
+            });
+            totalPriceElement.textContent = totalPrice.toFixed(2);
+        }
+        
+        async function placeOrderAndPrintInvoice() {
+            const orderPayload = { customerName: customerNameInput.value.trim(), customerPhone: customerPhoneInput.value.trim(), billedBy: billedBySelect.value, paymentMethod: paymentMethodSelect.value, cart: shoppingCart };
+            if (!orderPayload.customerName || !orderPayload.customerPhone || orderPayload.cart.length === 0) return alert('Please fill customer details and add items to the cart.');
+            const response = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(orderPayload) });
+            if (!response.ok) return alert('Failed to place the order. Please try again.');
+            
+            // This now calls the complete function below
+            generateInvoicePDF(orderPayload); 
+            
+            await initializeApp();
+            shoppingCart = [];
+            updateCartDisplay();
+            customerNameInput.value = '';
+            customerPhoneInput.value = '';
+        }
+
+        /**
+         * ## THIS IS THE COMPLETE AND CORRECT INVOICE FUNCTION ##
+         */
+        function generateInvoicePDF(order) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let y = 20; // Y position cursor
+
+            // --- Document Header ---
+            doc.setFontSize(26); doc.setFont('helvetica', 'bold'); doc.text("Quick Eats", 20, y);
+            doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.text("Sector 18, Noida, UP, India", 20, y + 6); doc.text("contact@quickeats.com | +91 98765 43210", 20, y + 10);
+            doc.setFontSize(18); doc.setFont('helvetica', 'bold'); doc.text("INVOICE", 190, y, { align: 'right' });
+            y += 20; doc.line(20, y, 190, y); y += 10;
+
+            // --- Customer & Order Details ---
+            const today = new Date(); const formattedDate = `${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
+            doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.text("Bill To:", 20, y); doc.setFont('helvetica', 'normal'); doc.text(order.customerName, 20, y + 5); doc.text(order.customerPhone, 20, y + 10);
+            doc.setFont('helvetica', 'bold'); doc.text("Date:", 140, y); doc.setFont('helvetica', 'normal'); doc.text(formattedDate, 190, y, { align: 'right' });
+            doc.setFont('helvetica', 'bold'); doc.text("Payment Method:", 140, y + 5); doc.setFont('helvetica', 'normal'); doc.text(order.paymentMethod, 190, y + 5, { align: 'right' });
+            doc.setFont('helvetica', 'bold'); doc.text("Billed By:", 140, y + 10); doc.setFont('helvetica', 'normal'); doc.text(order.billedBy, 190, y + 10, { align: 'right' });
+            y += 25;
+
+            // --- Invoice Table ---
+            const itemX = 20, qtyX = 130, priceX = 160, totalX = 190;
+            doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.text("Item", itemX, y); doc.text("Qty", qtyX, y, { align: 'right' }); doc.text("Price", priceX, y, { align: 'right' }); doc.text("Total", totalX, y, { align: 'right' });
+            y += 3; doc.line(20, y, 190, y); y += 7;
+            doc.setFont('helvetica', 'normal');
+            let subtotal = 0;
+            order.cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+                doc.text(item.name, itemX, y); doc.text(String(item.quantity), qtyX, y, { align: 'right' }); doc.text(`RS ${item.price.toFixed(2)}`, priceX, y, { align: 'right' }); doc.text(`RS ${itemTotal.toFixed(2)}`, totalX, y, { align: 'right' });
+                y += 7;
+            });
+            y += 3; doc.line(120, y, 190, y); y += 7;
+
+            // --- Invoice Total ---
+            doc.setFontSize(14); doc.setFont('helvetica', 'bold'); doc.text("Total Amount", 120, y, { align: 'right' }); doc.text(`RS ${subtotal.toFixed(2)}`, totalX, y, { align: 'right' });
+            y += 20;
+
+            // --- Footer ---
+            doc.setFontSize(10); doc.setFont('helvetica', 'italic'); doc.text("Thank you for your business!", 105, y, { align: 'center' });
+            doc.autoPrint();
+            window.open(doc.output('bloburl'), '_blank');
+        }
+
+        initializeApp();
+    });
+    </script>
+</body>
+</html>

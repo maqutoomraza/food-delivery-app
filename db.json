@@ -1,0 +1,50 @@
+{
+  "products": [
+    {
+      "name": "Turkey Pepperoni Pizza",
+      "price": 199,
+      "stock": 3,
+      "category": "Pizza",
+      "id": "turkey-pepperoni-pizza-1758316148802",
+      "image": "/uploads/image-1758316148799-421743020.jpg"
+    },
+    {
+      "name": "Plane Veg Burger",
+      "price": 149,
+      "stock": 6,
+      "category": "Burger",
+      "id": "plane-veg-burger-1758316194130",
+      "image": "/uploads/image-1758316194128-807162950.jpg"
+    },
+    {
+      "name": "Margherita Pizza",
+      "price": 149,
+      "stock": 46,
+      "category": "Pizza",
+      "id": "margherita-pizza-1758316244091",
+      "image": "/uploads/image-1758316244088-950160663.jpg"
+    },
+    {
+      "name": "Burger basic",
+      "price": 50,
+      "stock": 5,
+      "category": "Burger",
+      "id": "burger-basic-1758556823089",
+      "image": "/uploads/image-1758556823087-497809329.jpeg"
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "$2a$10$N9pE.a5y3YkH.fX5cQj/Lu.1FDC9u5k.A8w3w3j/K7UvNn2i.9ZUW",
+      "role": "admin"
+    },
+    {
+      "id": 2,
+      "username": "manager",
+      "password": "$2a$10$B5k0h.m5hX.8Ua4t1fN4H.2N2aC2d7l3fX.6i9n2l8fX.5c8hM6q",
+      "role": "manager"
+    }
+  ]
+}
